@@ -14,16 +14,16 @@ export function ToolsPage() {
         <div className="grid md:grid-cols-2 gap-6">
 
           <button
-            onClick={() => navigate('/calculator')}
-            className="p-6 bg-white rounded-2xl shadow-lg text-right hover:shadow-xl transition"
-          >
-            <h2 className="text-xl font-bold mb-2">
-              🔧 محاسبه قیمت تراشکاری CNC
-            </h2>
-            <p>
-              محاسبه وزن، زمان ماشینکاری و قیمت تقریبی قطعه
-            </p>
-          </button>
+  onClick={() => navigate('/calculator')}
+  className="p-6 bg-gradient-to-br from-navy-800 to-bronze-600 text-white rounded-2xl shadow-xl text-right hover:shadow-2xl transition border-2 border-bronze-400"
+>
+  <h2 className="text-xl font-bold mb-2">
+    🔧 محاسبه قیمت تراشکاری CNC
+  </h2>
+  <p>
+    محاسبه وزن، زمان ماشینکاری و قیمت تقریبی قطعه
+  </p>
+</button>
 
 
           <button

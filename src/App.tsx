@@ -71,6 +71,18 @@ function ContactPageWrapper() {
   );
 }
 
+function CalculatorPageWrapper() {
+  const navigate = useNavigate();
+
+  return (
+    <MainLayout>
+      <CalculatorPage 
+        onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)}
+      />
+    </MainLayout>
+  );
+}
+
 function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -150,6 +162,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePageWrapper />} />
           <Route path="/tools" element={<ToolsPageWrapper />} />
+          <Route path="/calculator" element={<CalculatorPageWrapper />} />
           <Route path="/contact" element={<ContactPageWrapper />} />
           <Route path="/admin/login" element={<AdminLoginPageWrapper />} />
           <Route
