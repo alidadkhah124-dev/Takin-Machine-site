@@ -3,6 +3,7 @@ import { Calculator, Plus, Trash2, AlertTriangle, Send, Phone, FileText, Chevron
 import { useSettings } from '../hooks/useSettings';
 import { useAuth } from '../contexts/AuthContext';
 import type { MachiningStep, InternalStep, CalculationResult } from '../types';
+import emailjs from '@emailjs/browser';
 
 interface CalculatorPageProps {
   onNavigate: (page: string) => void;
@@ -20,6 +21,10 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
   const [rawLength, setRawLength] = useState(0);
   const [rawInnerDiameter, setRawInnerDiameter] = useState(0);
 
+  const[isFinalSending,setIsFinalSending]=useState(false);
+  const [sendDrawing, setSendDrawing] = useState(false)
+  const [showFinalInquiry, setShowFinalInquiry] = useState(false);
+
   const [steps, setSteps] = useState<MachiningStep[]>([
     { diameter: 0, length: 0, tolerance: 'free', threadType: 'none', threadSize: '', threadPitch: '', threadLength: 0 },
   ]);
@@ -32,6 +37,14 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
   const [quantity, setQuantity] = useState(1);
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [IsSending, setIsSending] = useState(false)
+
+  const[customerName,setCustomerName]=useState('');
+  const[companyName,setCompanyName]=useState('');
+  const[phoneNumber,setPhoneNumer]=useState('');
+  const[customerDescription,setCustomerDescription]=useState('');
+  
+
 
   const addStep = () => {
     setSteps([...steps, { diameter: 0, length: 0, tolerance: 'free', threadType: 'none', threadSize: '', threadPitch: '', threadLength: 0 }]);
@@ -65,11 +78,162 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
     setInternalSteps(newSteps);
   };
 
+  const sendInquiry = async () => {
+  if (IsSending) return;
+  if (!result) return;
+
+  setIsSending(true);
+
+  const details = `
+استعلام جدید از سایت تکین ماشین مانا
+
+==============================
+
+شناسه کاربر:
+${getUserId()}
+
+تاریخ و ساعت:
+${new Date().toLocaleString('fa-IR')}
+
+------------------------------
+
+جنس متریال:
+${material}
+
+تعداد:
+${quantity}
+
+روش محاسبه:
+${weightMethod}
+
+قطر خام:
+${rawDiameter} میلی‌متر
+
+طول خام:
+${rawLength} میلی‌متر
+
+وزن متریال خام:
+${formatNumber(result.rawWeight, 2)} کیلوگرم
+
+وزن قطعه نهایی:
+${formatNumber(result.finalWeight, 2)} کیلوگرم
+
+زمان ماشینکاری:
+${formatNumber(result.machiningTime, 1)} دقیقه
+
+قیمت تقریبی:
+${formatCurrency(result.totalCost)}
+
+==============================
+
+این ایمیل به صورت خودکار از سایت تکین ماشین مانا ارسال شده است.
+`;
+
+  try {
+    await emailjs.send(
+      'service_778wqyi',
+      'template_abgdpw3',
+      {
+        subject: 'استعلام جدید سایت',
+        message: details,
+      },
+      {
+        publicKey: '-StDVTqF0_ZyQ-H3X',
+      }
+    );
+
+    setIsSending(false);
+
+    alert('درخواست شما با موفقیت ارسال شد.');
+
+  } catch (error) {
+    setIsSending(false);
+    console.error(error);
+    alert('ارسال درخواست انجام نشد.');
+  }
+};
+
+
+const sendCustomerInquiry = async () => {
+  if (!customerName || !phoneNumber) {
+    alert('لطفاً نام و شماره تماس را وارد کنید');
+    return;
+  }
+
+  const details = `
+استعلام جدید از سایت تکین ماشین مانا
+
+----------------------
+
+نام مشتری:
+${customerName}
+
+نام شرکت:
+${companyName}
+
+شماره تماس:
+${phoneNumber}
+
+توضیحات:
+${customerDescription}
+
+----------------------
+
+اطلاعات قطعه:
+
+جنس:
+${material}
+
+تعداد:
+${quantity}
+
+وزن خام:
+${result ? formatNumber(result.rawWeight, 2) : '-'} کیلوگرم
+
+وزن نهایی:
+${result ? formatNumber(result.finalWeight, 2) : '-'} کیلوگرم
+
+قیمت تقریبی:
+${result ? formatCurrency(result.totalCost) : '-'}
+
+نوع درخواست:
+${sendDrawing ? 'ارسال نقشه' : 'استعلام نهایی'}
+
+----------------------
+
+ارسال شده از سایت تکین ماشین مانا
+`;
+
+  try {
+    await emailjs.send(
+      'service_778wqyi',
+      'template_abgdpw3',
+      {
+        subject: 'استعلام جدید سایت',
+        message: details,
+      },
+      {
+        publicKey: '-StDVTqF0_ZyQ-H3X',
+      }
+    );
+
+    alert('درخواست شما با موفقیت ارسال شد');
+
+    setShowFinalInquiry(false);
+
+  } catch (error) {
+    console.error(error);
+    alert('ارسال درخواست ناموفق بود');
+  }
+};
+
+
   const calculateCost = () => {
     if (!materials.length || !tolerances.length || !threads.length) return;
 
     const mat = materials.find(m => m.material_name === material) || materials[0];
-    const machiningCostPerMinute = adminSettings['machining_cost_per_minute'] || 50000;
+    console.log(mat);
+    const machiningCostPerMinute = adminSettings['machining_cost_per_minute'] || 120000;
     const programmingCost = adminSettings['programming_cost'] || 500000;
     const overheadCost = adminSettings['overhead_cost'] || 200000;
     const passesPerOperation = adminSettings['passes_per_operation'] || 3;
@@ -77,36 +241,98 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
     let rawWeight = 0;
     let finalWeight = 0;
 
+
+
     if (weightMethod === 'direct') {
       rawWeight = directWeight;
-      const totalMachinedVolume = steps.reduce((sum, step) => {
-        return sum + (Math.PI * Math.pow(step.diameter / 2000, 2) * (step.length / 1000));
+
+      // حجم قطعه نهایی بیرونی
+      let finalVolume = steps.reduce((sum, step) => {
+        if (step.diameter > 0 && step.length > 0) {
+          const radius = step.diameter / 2000;
+          return sum + (Math.PI * radius * radius * (step.length / 1000));
+        }
+        return sum;
       }, 0);
-      finalWeight = rawWeight - (totalMachinedVolume * mat.density * 1000);
+
+      // کم کردن حجم داخل تراشی
+      if (hasInternalMachining) {
+        const internalVolume = internalSteps.reduce((sum, step) => {
+          if (step.diameter > 0 && step.length > 0) {
+            const radius = step.diameter / 2000;
+            return sum + (Math.PI * radius * radius * (step.length / 1000));
+          }
+          return sum;
+        }, 0);
+
+        finalVolume -= internalVolume;
+      }
+
+      finalWeight = Math.max(0, finalVolume * mat.density * 1000);
+
     } else {
-      const outerRadius = rawDiameter / 2000;
-      const innerRadius = rawInnerDiameter > 0 ? rawInnerDiameter / 2000 : 0;
-      const crossSectionArea = crossSectionType === 'hex'
-        ? (Math.pow(rawDiameter / 2000, 2) * Math.sqrt(3) * 2)
-        : (Math.PI * (Math.pow(outerRadius, 2) - Math.pow(innerRadius, 2)));
-      rawWeight = crossSectionArea * (rawLength / 1000) * mat.density * 1000;
 
-      const finalVolume = steps.reduce((sum, step) => {
-        return sum + (Math.PI * Math.pow(step.diameter / 2000, 2) * (step.length / 1000));
+      // وزن خام از ابعاد
+      const radius = rawDiameter / 2000;
+      const length = rawLength / 1000;
+
+      let rawVolume = Math.PI * radius * radius * length;
+
+      // کم کردن سوراخ داخلی خام
+      if (rawInnerDiameter > 0) {
+        const innerRadius = rawInnerDiameter / 2000;
+        const innerVolume = Math.PI * innerRadius * innerRadius * length;
+        rawVolume = rawVolume - innerVolume;
+      }
+
+      rawWeight = rawVolume * mat.density * 1000;
+
+
+      // وزن قطعه نهایی از پله‌ها
+      let finalVolume = steps.reduce((sum, step) => {
+        if (step.diameter > 0 && step.length > 0) {
+          const stepRadius = step.diameter / 2000;
+          return sum + (Math.PI * stepRadius * stepRadius * (step.length / 1000));
+        }
+        return sum;
       }, 0);
-      finalWeight = Math.max(0.01, finalVolume * mat.density * 1000);
-    }
 
-    const materialCost = rawWeight * mat.cost_per_kg;
+
+      // کم کردن حجم داخل تراشی
+      if (hasInternalMachining) {
+        const internalVolume = internalSteps.reduce((sum, step) => {
+          if (step.diameter > 0 && step.length > 0) {
+            const innerRadius = step.diameter / 2000;
+            return sum + (Math.PI * innerRadius * innerRadius * (step.length / 1000));
+          }
+          return sum;
+        }, 0);
+
+        finalVolume -= internalVolume;
+      }
+
+      finalWeight = Math.max(0, finalVolume * mat.density * 1000);
+    }
 
     let totalMachiningTime = 0;
     let toleranceCoefficient = 1;
 
     steps.forEach(step => {
       if (step.diameter > 0 && step.length > 0) {
-        const depthOfCut = (rawDiameter - step.diameter) / 2000;
-        const cuttingTime = (Math.PI * step.diameter / 1000 * step.length / 1000) / (mat.cutting_speed * mat.feed_rate);
-        const passesNeeded = Math.max(1, Math.ceil(depthOfCut / (mat.feed_rate * 10)));
+
+        // قطر خام برای محاسبه دور
+        const rpm = (mat.cutting_speed * 1000) / (Math.PI * rawDiameter);
+
+        // سرعت حرکت ابزار mm/min
+        const feedSpeed = rpm * mat.feed_rate;
+
+        // زمان تراش طولی بر حسب دقیقه
+        const cuttingTime = step.length / feedSpeed;
+
+        // تعداد پاس بر اساس عمق بار 1.5 میلیمتر
+        const diameterReduction = rawDiameter - step.diameter;
+        const passesNeeded = Math.max(1, Math.ceil(diameterReduction / 3));
+
         totalMachiningTime += cuttingTime * passesNeeded;
       }
 
@@ -116,6 +342,36 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
       }
     });
 
+    // زمان کف تراشی
+    let facingTime = 0;
+
+    if (rawLength > 0) {
+
+      const finalLength = steps.reduce((sum, step) => {
+        return sum + step.length;
+      }, 0);
+
+      const facingAllowance = rawLength - finalLength;
+
+      if (facingAllowance > 0) {
+
+        // دور بر اساس قطر خام
+        const rpm = (mat.cutting_speed * 1000) / (Math.PI * rawDiameter);
+
+        // سرعت پیشروی ابزار
+        const feedSpeed = rpm * mat.feed_rate;
+
+        // هر کف تراشی با عمق بار 1.5 میلیمتر
+        const passesNeeded = Math.ceil(facingAllowance / 1.5);
+
+        // زمان یک پاس کف تراشی (حرکت شعاعی)
+        const facingTimePerPass = rawDiameter / feedSpeed;
+
+        facingTime = facingTimePerPass * passesNeeded;
+      }
+    }
+
+    totalMachiningTime += facingTime;
     let threadCost = 0;
     steps.forEach(step => {
       if (step.threadType !== 'none' && step.threadLength > 0) {
@@ -127,19 +383,57 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
     });
 
     let internalMachiningTime = 0;
+
     internalSteps.forEach(step => {
       if (step.diameter > 0 && step.length > 0) {
-        const cuttingTime = (Math.PI * step.diameter / 1000 * step.length / 1000) / (mat.cutting_speed * mat.feed_rate * 0.7);
-        const tol = tolerances.find(t => t.tolerance_name === step.tolerance);
-        const tolCoef = tol ? tol.coefficient : 1;
-        internalMachiningTime += cuttingTime * tolCoef;
+
+        // دور بر اساس قطر داخلی خام
+        const rpm = (mat.cutting_speed * 1000) / (Math.PI * rawInnerDiameter);
+
+        // سرعت پیشروی ابزار
+        const feedSpeed = rpm * mat.feed_rate;
+
+        // زمان تراش طولی
+        const cuttingTime = step.length / feedSpeed;
+
+        // تعداد پاس بر اساس اختلاف قطر داخلی
+        const diameterReduction = step.diameter - rawInnerDiameter;
+
+        const passesNeeded = Math.max(1, Math.ceil(Math.abs(diameterReduction) / 3));
+
+        internalMachiningTime += cuttingTime * passesNeeded;
       }
     });
 
-    const machiningCost = totalMachiningTime * machiningCostPerMinute * toleranceCoefficient;
-    const internalMachiningCost = hasInternalMachining ? internalMachiningTime * machiningCostPerMinute : 0;
+    let quantityCoefficient = 1;
 
-    const totalCost = (materialCost + machiningCost + threadCost + internalMachiningCost + programmingCost + overheadCost) * quantity;
+    if (quantity > 1000) quantityCoefficient = 0.87;
+    else if (quantity > 500) quantityCoefficient = 0.90;
+    else if (quantity > 100) quantityCoefficient = 0.93;
+    else if (quantity > 50) quantityCoefficient = 0.97;
+    else if (quantity > 10) quantityCoefficient = 0.99;
+
+    totalMachiningTime +=
+      internalMachiningTime;
+    const machiningCost =
+      Number(totalMachiningTime) *
+      Number(machiningCostPerMinute) *
+      Number(toleranceCoefficient) *
+      Number(mat.machining_coefficient || 1) *
+      quantityCoefficient;
+    console.log("time:", totalMachiningTime, "min:", machiningCostPerMinute, "tol:", toleranceCoefficient);
+    const internalMachiningCost = 0;
+
+    const materialCost = rawWeight * mat.cost_per_kg;
+
+    const totalCost =
+      (
+        (machiningCost || 0) +
+        (threadCost || 0) +
+        (internalMachiningCost || 0)
+      ) * quantity
+      + (programmingCost || 0)
+      + (overheadCost || 0);
 
     setResult({
       rawWeight,
@@ -156,12 +450,25 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
     });
   };
 
+  const getUserId = () => {
+    let userId = localStorage.getItem('tekin_user_id');
+
+    if (!userId) {
+      userId = 'TM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      localStorage.setItem('tekin_user_id', userId);
+    }
+
+    return userId;
+  };
+
   const formatNumber = (num: number, decimals: number = 0) => {
     return num.toLocaleString('fa-IR', { maximumFractionDigits: decimals });
   };
 
   const formatCurrency = (num: number) => {
-    return num.toLocaleString('fa-IR') + ' ریال';
+    const rounded =
+      Math.round(num / 1000) * 1000;
+    return rounded.toLocaleString('fa-IR') + ' ریال';
   };
 
   if (loading) {
@@ -216,15 +523,14 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
                       />
                       <span>گرد</span>
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex items-center gap-2 cursor-not--allowed opacity-50">
                       <input
                         type="radio"
                         name="crossSection"
-                        checked={crossSectionType === 'hex'}
-                        onChange={() => setCrossSectionType('hex')}
-                        className="w-4 h-4 text-bronze-500"
+                        disabled
+                        className="w-4 h-4 text-gray-400"
                       />
-                      <span>شش‌پر</span>
+                      <span>شش‌پر(به زودی)</span>
                     </label>
                   </div>
                 </div>
@@ -579,7 +885,7 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-gray-300 text-sm mb-1">وزن قطعه نهایی</p>
-                    <p className="text-2xl font-bold">{formatNumber(Math.max(0.1, result.rawWeight - (result.machiningCost / (adminSettings['machining_cost_per_minute'] || 50000))), 2)} کیلوگرم</p>
+                    <p className="text-2xl font-bold">{formatNumber(result.finalWeight, 2)} کیلوگرم</p>
                   </div>
                   <div className="bg-bronze-500 rounded-xl p-4">
                     <p className="text-bronze-100 text-sm mb-1">قیمت تقریبی ماشینکاری</p>
@@ -638,6 +944,16 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
                 </div>
               )}
 
+              <div className="p-6">
+                <button
+                  onClick={sendInquiry}
+                  disabled={IsSending}
+                  className="w-full bg-gradient-to-l from-bronze-500 to-bronze-600 text-white py-4 rounded-xl font-bold text-lg hover:from-bronze-600 hover:to-bronze-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  {IsSending ? 'در حال ارسال...' : 'کارشناسی مجدد اطلاعات'}
+                </button>
+              </div>
+
               {/* Warning - Always visible */}
               <div className="p-4 bg-amber-50 border-t border-amber-200">
                 <div className="flex items-start gap-3">
@@ -647,28 +963,114 @@ export function CalculatorPage({ onNavigate }: CalculatorPageProps) {
                   </p>
                 </div>
               </div>
+            {/* Action Buttons */}
+<div className="p-6 bg-gray-50 flex flex-col sm:flex-row gap-3">
 
-              {/* Action Buttons */}
-              <div className="p-6 bg-gray-50 flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => onNavigate('contact')}
-                  className="btn-primary flex-1 flex items-center justify-center gap-2"
-                >
-                  <Phone className="w-5 h-5" />
-                  درخواست استعلام نهایی
-                </button>
-                <button
-                  onClick={() => onNavigate('contact')}
-                  className="btn-secondary flex-1 flex items-center justify-center gap-2"
-                >
-                  <Send className="w-5 h-5" />
-                  ارسال نقشه
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  <button
+    onClick={() => {
+      setSendDrawing(false);
+      setShowFinalInquiry(true);
+    }}
+    className="btn-primary flex-1 flex items-center justify-center gap-2"
+  >
+    <Phone className="w-5 h-5" />
+    درخواست استعلام نهایی
+  </button>
+
+  <button
+    onClick={() => {
+      setSendDrawing(true);
+      setShowFinalInquiry(true);
+    }}
+    className="btn-secondary flex-1 flex items-center justify-center gap-2"
+  >
+    <Send className="w-5 h-5" />
+    ارسال نقشه
+  </button>
+
+</div>
+
+{/* Final Inquiry Form */}
+{showFinalInquiry && (
+  <div className="p-6 bg-white border-t border-gray-200">
+    <h3 className="text-xl font-bold text-navy-900 mb-4">
+      {sendDrawing ? 'ارسال نقشه' : 'درخواست استعلام نهایی'}
+    </h3>
+
+    <div className="space-y-4">
+
+  <div>
+    <label className="block text-sm font-medium mb-1">
+      نام و نام خانوادگی
+    </label>
+    <input
+      type="text"
+      value={customerName}
+      onChange={(e) =>
+        setCustomerName(e.target.value)}
+      className="w-full border rounded-lg px-4 py-2"
+      placeholder="نام خود را وارد کنید"
+    />
+  </div>
+
+  <div>
+    <label className="block text-sm font-medium mb-1">
+      نام شرکت
+    </label>
+    <input
+      type="text"
+      value={companyName}
+      onChange={(e) =>
+        setCompanyName(e.target.value)}
+      className="w-full border rounded-lg px-4 py-2"
+      placeholder="نام شرکت شما"
+    />
+  </div>
+
+  <div>
+    <label className="block text-sm font-medium mb-1">
+      شماره تماس
+    </label>
+    <input
+      type="text"
+      value={phoneNumber}
+      onChange={(e) =>
+        setPhoneNumer(e.target.value)}
+      className="w-full border rounded-lg px-4 py-2"
+      placeholder="شماره تماس"
+    />
+  </div>
+
+  <div>
+    <label className="block text-sm font-medium mb-1">
+      توضیحات
+    </label>
+    <textarea
+    value={customerDescription}
+      onChange={(e) =>
+        setCustomerDescription(e.target.value)}
+      className="w-full border rounded-lg px-4 py-2"
+      rows={4}
+      placeholder="توضیحات تکمیلی..."
+    />
+  </div>
+
+  <button
+  onClick={sendCustomerInquiry}
+  disabled={IsSending}
+  className="w-full bg-gradient-to-l from-bronze-500 to-bronze-600 text-white py-3 rounded-xl font-bold disabled:opacity-60"
+>
+  {IsSending ? 'در حال ارسال...' : 'ارسال درخواست'}
+</button>
+
+</div>
+  </div>
+)}
+
+</div>
+)}
+</div>
+</div>
+</div>
+);
 }

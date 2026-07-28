@@ -59,12 +59,11 @@ export function HomePage({ onNavigate }: HomePageProps) {
   ];
 
   const activities = [
-    { icon: Cable, title: 'تجهیزات جابجایی مواد' },
-    { icon: Anchor, title: 'وینچ‌های صنعتی' },
+    { icon: Cog, title: 'تجهیزات جابجایی مواد' },
+    { icon: Cog, title: 'وینچ‌های صنعتی' },
     { icon: Zap, title: 'مگنت‌های صنعتی' },
-    { icon: Cable, title: 'تجهیزات جرثقیل' },
-    { icon: Anchor, title: 'قلاب‌های صنعتی' },
-    { icon: Package, title: 'C-Hook' },
+    { icon: Cog, title: 'تجهیزات جرثقیل' },
+    { icon: Cog, title: 'قلاب‌های صنعتی' },
     { icon: Factory, title: 'قطعات سفارشی صنعتی' },
   ];
 

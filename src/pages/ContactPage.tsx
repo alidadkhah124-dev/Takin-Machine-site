@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Phone, Mail, MapPin, MessageCircle, Send, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
-
+import emailjs from '@emailjs/browser';
 export function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -11,20 +11,40 @@ export function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const[isFinalSending,setIsFinalSending]=useState(false);
+  
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  try {
+    await emailjs.send(
+      'service_778wqyi',
+      'template_abgdpw3',
+      formData,
+      {
+        publicKey: '-StDVTqF0_ZyQ-H3X',
+      }
+    );
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setIsSubmitting(false);
     setSubmitted(true);
-    setFormData({ name: '', phone: '', email: '', subject: '', message: '' });
+    setFormData({
+      name: '',
+      phone: '',
+      email: '',
+      subject: '',
+      message: '',
+    });
 
-    setTimeout(() => setSubmitted(false), 5000);
-  };
+    setTimeout(() => setSubmitted(false), 10000);
 
+  } catch (error) {
+    console.error('Email error:', error);
+    alert('ارسال پیام انجام نشد. لطفاً دوباره تلاش کنید.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   const contactInfo = [
     {
       icon: Phone,
@@ -142,7 +162,7 @@ export function ContactPage() {
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3"
-                    placeholder="۰۹۱۳۲۳۲۸۲۹۲"
+                    placeholder="09123456789"
                     dir="ltr"
                   />
                 </div>

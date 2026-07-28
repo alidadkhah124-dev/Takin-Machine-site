@@ -9,6 +9,8 @@ import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 
+import{ToolsPage} from './pages/ToolsPage';
+
 function MainLayout({ children }: { children: React.ReactNode }) {
   const [currentPage, setCurrentPage] = useState('home');
   const navigate = useNavigate();
@@ -53,10 +55,9 @@ function HomePageWrapper() {
 }
 
 function ToolsPageWrapper() {
-  const navigate = useNavigate();
   return (
     <MainLayout>
-      <CalculatorPage onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} />
+      <ToolsPage />
     </MainLayout>
   );
 }

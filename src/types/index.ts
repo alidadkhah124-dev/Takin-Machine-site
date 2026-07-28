@@ -6,6 +6,7 @@ export interface MaterialSetting {
   feed_rate: number;
   density: number;
   cost_per_kg: number;
+  machining_coefficient: number;
 }
 
 export interface ToleranceCoefficient {
