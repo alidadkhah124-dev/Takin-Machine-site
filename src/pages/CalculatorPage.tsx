@@ -164,6 +164,8 @@ const sendCustomerInquiry = async () => {
 استعلام جدید از سایت تکین ماشین مانا
 
 ----------------------
+شناسه کاربر:
+${getUserId()}
 
 نام مشتری:
 ${customerName}
