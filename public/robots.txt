@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://takinmachinemana.ir/sitemap.xml
