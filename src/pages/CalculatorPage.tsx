@@ -492,7 +492,7 @@ ${sendDrawing ? 'ارسال نقشه' : 'استعلام نهایی'}
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-bronze-400 to-bronze-600 rounded-2xl mb-4">
               <Calculator className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-navy-900 mb-2">محاسبه‌گر قیمت ماشینکاری</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-navy-900 mb-2"محاسبه قیمت تراشکاری</h1>
             <p className="text-gray-600">برآورد اولیه قیمت ماشینکاری قطعات تراشکاری</p>
           </div>
 
