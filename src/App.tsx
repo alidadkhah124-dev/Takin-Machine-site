@@ -9,6 +9,8 @@ import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 
+import { FloatingContact } from './components/FloatingContact';
+
 import{ToolsPage} from './pages/ToolsPage';
 
 function MainLayout({ children }: { children: React.ReactNode }) {
@@ -41,6 +43,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       <Header currentPage={currentPage} onNavigate={handleNavigate} />
       <main className="flex-grow">{children}</main>
       <Footer onNavigate={handleNavigate} />
+      <FloatingContact />
     </div>
   );
 }

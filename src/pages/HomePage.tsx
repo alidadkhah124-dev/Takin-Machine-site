@@ -85,7 +85,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
             <div className="inline-flex items-center gap-2 bg-bronze-500/20 text-bronze-300 px-4 py-2 rounded-full mb-8 border border-bronze-500/30">
               <span className="w-2 h-2 bg-bronze-400 rounded-full animate-pulse"></span>
-              <span className="text-sm font-medium">بیش از ۲۰ سال تجربه در صنعت</span>
+              <span className="text-sm font-medium">بیش از 10 سال تجربه در صنعت</span>
             </div>
 
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
