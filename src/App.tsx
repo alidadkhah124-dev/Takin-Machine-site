@@ -9,6 +9,8 @@ import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 
+import SystemizationPage from './pages/SystemizationPage';
+
 import { FloatingContact } from './components/FloatingContact';
 
 import{ToolsPage} from './pages/ToolsPage';
@@ -166,6 +168,8 @@ function App() {
           <Route path="/" element={<HomePageWrapper />} />
           <Route path="/tools" element={<ToolsPageWrapper />} />
           <Route path="/calculator" element={<CalculatorPageWrapper />} />
+          <Route path="/systemization" element={<MainLayout> <SystemizationPage /> </MainLayout> }
+/>
           <Route path="/contact" element={<ContactPageWrapper />} />
           <Route path="/admin/login" element={<AdminLoginPageWrapper />} />
           <Route
