@@ -12,7 +12,7 @@ export function Logo({ size = 'md', className = '', showText = true }: LogoProps
   const sizes = {
     sm: { container: 'w-8 h-8', text: 'text-sm', subtext: 'text-xs' },
     md: { container: 'w-12 h-12', text: 'text-lg', subtext: 'text-xs' },
-    lg: { container: 'w-20 h-20', text: 'text-2xl', subtext: 'text-sm' },
+    lg: { container: 'w-32 h-32', text: 'text-2xl', subtext: 'text-sm' },
   };
 
   const currentSize = sizes[size];
@@ -40,7 +40,7 @@ export function Logo({ size = 'md', className = '', showText = true }: LogoProps
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <div className={`${currentSize.container} rounded-xl overflow-hidden shadow-lg bg-white`}>
+      <div className={`${currentSize.container} rounded-xl overflow-hidden shadow-lg bg-transparent`}>
         <img
           src="/LOGO.png"
           alt="تکین ماشین مانا"

@@ -1,4 +1,4 @@
-import { Phone, Mail, MapPin, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, MessageCircle, Instagram, Linkedin } from 'lucide-react';
 import { LogoIcon } from './Logo';
 
 interface FooterProps {
@@ -31,12 +31,14 @@ export function Footer({ onNavigate }: FooterProps) {
               >
                 صفحه اصلی
               </button>
+
               <button
                 onClick={() => onNavigate('tools')}
                 className="text-gray-400 hover:text-bronze-400 transition-colors text-right"
               >
                 ابزارهای مهندسی آنلاین
               </button>
+
               <button
                 onClick={() => onNavigate('contact')}
                 className="text-gray-400 hover:text-bronze-400 transition-colors text-right"
@@ -48,7 +50,10 @@ export function Footer({ onNavigate }: FooterProps) {
 
           <div>
             <h4 className="text-white font-semibold mb-4">تماس با ما</h4>
+
             <div className="flex flex-col gap-3">
+
+              {/* تلفن */}
               <div className="flex items-center gap-2 text-gray-400">
                 <Phone className="w-4 h-4" />
                 <div className="flex flex-col">
@@ -56,14 +61,55 @@ export function Footer({ onNavigate }: FooterProps) {
                   <span dir="ltr" className="text-sm">۰۳۱-۴۲۲۲۶۸۰۳</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-gray-400">
+
+              {/* واتساپ */}
+              <a
+                href="https://wa.me/989132328292"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-bronze-400 transition-colors"
+              >
                 <MessageCircle className="w-4 h-4" />
-                <span dir="ltr">۰۹۱۳۲۳۲۸۲۹۲</span>
-              </div>
+                <span dir="ltr">واتساپ</span>
+              </a>
+
+              {/* ایمیل */}
+              <a
+                href="mailto:takin.machine.mana@gmail.com"
+                className="flex items-center gap-2 text-gray-400 hover:text-bronze-400 transition-colors"
+              >
+                <Mail className="w-4 h-4" />
+                <span dir="ltr">takin.machine.mana@gmail.com</span>
+              </a>
+
+              {/* اینستاگرام */}
+              <a
+                href="https://www.instagram.com/takin_machin_mana/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-bronze-400 transition-colors"
+              >
+                <Instagram className="w-4 h-4" />
+                <span dir="ltr">Instagram</span>
+              </a>
+
+              {/* لینکدین */}
+              <a
+                href="https://www.linkedin.com/in/ali-dadkhah-62a087223/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-bronze-400 transition-colors"
+              >
+                <Linkedin className="w-4 h-4" />
+                <span dir="ltr">LinkedIn</span>
+              </a>
+
+              {/* آدرس */}
               <div className="flex items-start gap-2 text-gray-400">
                 <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
                 <span>اصفهان، خیابان حکیم، فرزانه صنعتگران ۳۷</span>
               </div>
+
             </div>
           </div>
         </div>

@@ -1,19 +1,27 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom';
+
 import { useAuth, AuthProvider } from './contexts/AuthContext';
+
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
+import { FloatingContact } from './components/FloatingContact';
+
 import { HomePage } from './pages/HomePage';
+import { ToolsPage } from './pages/ToolsPage';
 import { CalculatorPage } from './pages/CalculatorPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
-
 import SystemizationPage from './pages/SystemizationPage';
-
-import { FloatingContact } from './components/FloatingContact';
-
-import{ToolsPage} from './pages/ToolsPage';
+import { CNCTurningPage } from './pages/CNCTurningPage';
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const [currentPage, setCurrentPage] = useState('home');
@@ -22,12 +30,19 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const path = location.pathname.replace('/', '');
+
     if (path === '' || path === 'home') {
       setCurrentPage('home');
     } else if (path === 'tools') {
       setCurrentPage('tools');
     } else if (path === 'contact') {
       setCurrentPage('contact');
+    } else if (path === 'systemization') {
+      setCurrentPage('systemization');
+    } else if (path === 'cnc-turning') {
+      setCurrentPage('cnc-turning');
+    } else if (path === 'calculator') {
+      setCurrentPage('calculator');
     } else if (path === 'admin') {
       setCurrentPage('admin');
     }
@@ -35,16 +50,30 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page);
+
     const path = page === 'home' ? '/' : `/${page}`;
+
     navigate(path);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-50 font-vazir flex flex-col">
-      <Header currentPage={currentPage} onNavigate={handleNavigate} />
-      <main className="flex-grow">{children}</main>
+      <Header
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+      />
+
+      <main className="flex-grow">
+        {children}
+      </main>
+
       <Footer onNavigate={handleNavigate} />
+
       <FloatingContact />
     </div>
   );
@@ -52,9 +81,14 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
 function HomePageWrapper() {
   const navigate = useNavigate();
+
   return (
     <MainLayout>
-      <HomePage onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} />
+      <HomePage
+        onNavigate={(page) =>
+          navigate(page === 'home' ? '/' : `/${page}`)
+        }
+      />
     </MainLayout>
   );
 }
@@ -68,7 +102,6 @@ function ToolsPageWrapper() {
 }
 
 function ContactPageWrapper() {
-  const navigate = useNavigate();
   return (
     <MainLayout>
       <ContactPage />
@@ -81,27 +114,57 @@ function CalculatorPageWrapper() {
 
   return (
     <MainLayout>
-      <CalculatorPage 
-        onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)}
+      <CalculatorPage
+        onNavigate={(page) =>
+          navigate(page === 'home' ? '/' : `/${page}`)
+        }
       />
     </MainLayout>
   );
 }
 
-function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
+function SystemizationPageWrapper() {
+  return (
+    <MainLayout>
+      <SystemizationPage />
+    </MainLayout>
+  );
+}
+
+function CNCTurningPageWrapper() {
+  const navigate = useNavigate();
+
+  return (
+    <MainLayout>
+      <CNCTurningPage
+        onNavigate={(page) =>
+          navigate(page === 'home' ? '/' : `/${page}`)
+        }
+      />
+    </MainLayout>
+  );
+}
+
+function ProtectedAdminRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/admin/login', { replace: true });
+      navigate('/admin/login', {
+        replace: true,
+      });
     }
   }, [user, loading, navigate]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-bronze-500 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-bronze-500 border-t-transparent" />
       </div>
     );
   }
@@ -122,14 +185,22 @@ function AdminPageWrapper() {
     <div className="min-h-screen bg-gray-900">
       <div className="bg-navy-800 border-b border-navy-700 p-4">
         <div className="container mx-auto flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white transition-colors">
+          <button
+            onClick={() => navigate('/')}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
             بازگشت به سایت
           </button>
-          <button onClick={handleLogout} className="text-bronze-400 hover:text-bronze-300 transition-colors">
+
+          <button
+            onClick={handleLogout}
+            className="text-bronze-400 hover:text-bronze-300 transition-colors"
+          >
             خروج از پنل
           </button>
         </div>
       </div>
+
       <AdminPage />
     </div>
   );
@@ -141,14 +212,16 @@ function AdminLoginPageWrapper() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate('/admin', { replace: true });
+      navigate('/admin', {
+        replace: true,
+      });
     }
   }, [user, loading, navigate]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-bronze-500 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-bronze-500 border-t-transparent" />
       </div>
     );
   }
@@ -157,7 +230,11 @@ function AdminLoginPageWrapper() {
     return null;
   }
 
-  return <AdminLoginPage onNavigateHome={() => navigate('/')} />;
+  return (
+    <AdminLoginPage
+      onNavigateHome={() => navigate('/')}
+    />
+  );
 }
 
 function App() {
@@ -165,13 +242,50 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePageWrapper />} />
-          <Route path="/tools" element={<ToolsPageWrapper />} />
-          <Route path="/calculator" element={<CalculatorPageWrapper />} />
-          <Route path="/systemization" element={<MainLayout> <SystemizationPage /> </MainLayout> }
-/>
-          <Route path="/contact" element={<ContactPageWrapper />} />
-          <Route path="/admin/login" element={<AdminLoginPageWrapper />} />
+
+          {/* Home */}
+          <Route
+            path="/"
+            element={<HomePageWrapper />}
+          />
+
+          {/* Engineering Tools */}
+          <Route
+            path="/tools"
+            element={<ToolsPageWrapper />}
+          />
+
+          {/* Price Calculator */}
+          <Route
+            path="/calculator"
+            element={<CalculatorPageWrapper />}
+          />
+
+          {/* CNC Turning */}
+          <Route
+            path="/cnc-turning"
+            element={<CNCTurningPageWrapper />}
+          />
+
+          {/* Organizational System Engineering */}
+          <Route
+            path="/systemization"
+            element={<SystemizationPageWrapper />}
+          />
+
+          {/* Contact */}
+          <Route
+            path="/contact"
+            element={<ContactPageWrapper />}
+          />
+
+          {/* Admin Login */}
+          <Route
+            path="/admin/login"
+            element={<AdminLoginPageWrapper />}
+          />
+
+          {/* Admin */}
           <Route
             path="/admin"
             element={
@@ -180,7 +294,13 @@ function App() {
               </ProtectedAdminRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+
+          {/* Unknown routes */}
+          <Route
+            path="*"
+            element={<Navigate to="/" replace />}
+          />
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
